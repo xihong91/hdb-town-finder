@@ -1,0 +1,12 @@
+{
+  "name": "hdb-town-finder",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build-data": "node scripts/build-data.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

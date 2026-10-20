@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HDB Town Finder</title>
+  <meta name="description" content="Rank Singapore HDB towns by resale price growth, liquidity and amenities for your age, life stage, flat type and budget.">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="wrap">
+    <h1>HDB Town Finder</h1>
+    <p class="lede">Which HDB towns have grown the most in resale value, and are easy to sell in, for a buyer like you? Rankings use 10 years of HDB resale transactions from data.gov.sg.</p>
+  </header>
+
+  <main class="wrap">
+    <form id="form" class="card" autocomplete="off">
+      <fieldset>
+        <legend>About you</legend>
+        <div class="inputs">
+          <label>Your age
+            <input id="age" type="number" min="21" max="85" value="32" required>
+          </label>
+          <label><span>Co-buyer's age <span class="hint">(optional)</span></span>
+            <input id="coAge" type="number" min="21" max="85" placeholder="e.g. 30">
+          </label>
+          <label>Life stage
+            <select id="stage">
+              <option value="couple">Young couple</option>
+              <option value="family">Family with kids</option>
+              <option value="retiree">Retiree / senior</option>
+            </select>
+          </label>
+          <label>Flat type
+            <select id="flatType"></select>
+          </label>
+          <label>How long will you keep the flat?
+            <select id="hold">
+              <option value="5">5 years (minimum)</option>
+              <option value="10" selected>10 years</option>
+              <option value="15">15 years</option>
+              <option value="20">20 years</option>
+            </select>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Budget</legend>
+        <div class="toggle" role="radiogroup">
+          <label><input type="radio" name="budgetMode" value="finances" checked> Work it out from my finances</label>
+          <label><input type="radio" name="budgetMode" value="manual"> I know my budget</label>
+        </div>
+        <div id="financeInputs" class="inputs">
+          <label>Monthly household income (gross)
+            <input id="income" type="number" min="0" step="500" value="9000">
+          </label>
+          <label>CPF Ordinary Account (all buyers)
+            <input id="cpf" type="number" min="0" step="5000" value="120000">
+          </label>
+          <label>Cash savings for the flat
+            <input id="cash" type="number" min="0" step="5000" value="40000">
+          </label>
+        </div>
+        <div id="manualInputs" class="inputs" hidden>
+          <label>Budget (SGD)
+            <input id="budget" type="number" min="100000" step="10000" value="650000">
+          </label>
+        </div>
+        <p id="budgetNote" class="note"></p>
+      </fieldset>
+    </form>
+
+    <p id="leaseNote" class="note"></p>
+
+    <section>
+      <h2>Top picks for you</h2>
+      <div id="picks" class="picks"></div>
+    </section>
+
+    <section>
+      <h2>All towns ranked</h2>
+      <p class="note">Score = 70% estimated return + 30% liquidity, then up to ±15 points for amenities that matter to your life stage. Click a town to see its price trend.</p>
+      <div class="table-scroll">
+        <table id="table">
+          <thead>
+            <tr>
+              <th>#</th><th>Town</th><th>Score</th><th title="Price per sqm trend for flats with similar lease">Price trend / yr</th><th title="Price trend minus value lost as the lease runs down during your holding period">Est. return / yr</th><th>Sales / yr</th>
+              <th>Avg price</th><th>Avg size</th><th>Within budget</th><th>Amenities</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="detail" class="card" hidden>
+      <h2 id="detailTitle"></h2>
+      <p id="detailText" class="note"></p>
+      <div class="chart-box"><canvas id="chart"></canvas></div>
+    </section>
+
+    <section class="note method">
+      <h2>How it works</h2>
+      <ul>
+        <li><strong>Flat age:</strong> CPF can be used in full when the flat's remaining lease lasts until the youngest buyer is 95. The app only counts flats meeting that requirement (minimum 20 years left).</li>
+        <li><strong>Price trend:</strong> yearly trend in average price per sqm for matching flats (rolling 12-month periods). It uses the last 5 years if you plan to hold for 5 years, otherwise the last 10 years.</li>
+        <li><strong>Estimated return:</strong> the price trend minus the value a flat loses as its lease runs down over your holding period. The lease effect is estimated from recent sales: within each town, it compares prices of flats with different lease lengths.</li>
+        <li><strong>Budget from finances:</strong> maximum loan where the monthly instalment is at most 30% of income (Mortgage Servicing Ratio), up to 75% of the price, repaid by age 65. Uses an HDB loan at 2.6% if household income is $14,000 or less, otherwise a bank loan tested at 4%. The rest of the price, buyer's stamp duty and about $3,000 in fees come from CPF OA and cash. Grants and cash over valuation are not included.</li>
+        <li><strong>Liquidity:</strong> average number of matching resale transactions per year over the last 3 years.</li>
+        <li><strong>Amenities:</strong> MRT/LRT stations, primary schools and CHAS clinics per 10,000 HDB homes in the town, weighted by life stage: couples favour MRT, families favour schools, retirees favour clinics. Amenities are mapped by URA planning area, which roughly matches HDB towns.</li>
+        <li><strong>Within budget:</strong> share of matching flats sold in the last 12 months at or below your budget. Towns where under 25% fit are left out of the top picks.</li>
+        <li>Towns with fewer than 5 matching sales in the last 12 months are marked as too little data.</li>
+      </ul>
+      <p>This is a data tool based on past transactions, not financial advice. Past growth does not guarantee future returns. Check HDB and CPF rules for your own eligibility.</p>
+      <p id="meta"></p>
+    </section>
+  </main>
+</body>
+</html>
